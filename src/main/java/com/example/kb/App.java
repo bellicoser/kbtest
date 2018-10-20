@@ -10,12 +10,12 @@ public class App {
 	public static void main( String[] args ) {
 		
 		//original array compare sort array
-		// if arryr1 compareto array2 = 2 return true otherwise return false
+		// if arr1[i] compareTo arr2[i] and differ = 2 return true otherwise return false
 
-		    int[] A = {2, 5, 3, 3, 7};// true   2 3 3 5 7 ()
+		    int[] A = {2, 5, 3, 3, 7};// true   2 3 3 5 7 (2)
 		    int[] B = {1, 3, 5, 2, 4};// false  1 2 3 4 5 (1)
-		    int[] C = {1, 5, 3, 3, 7};// true
-		    int[] D = {1, 5, 3, 3, 4, 1, 10}; //true
+		    int[] C = {1, 5, 3, 3, 7};// true   1 3 3 5 7 (2)
+		    int[] D = {1, 5, 3, 3, 4, 1, 10}; //true   1 1 3 3 4 5 10
 		    System.out.println("A");
 		    for (int a : A) {
 				System.out.print(a+" ");
