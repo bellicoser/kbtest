@@ -15,14 +15,10 @@ import java.util.stream.Stream;
  */
 public class App3 {
 	public static void main(String[] args) throws ParseException {
-		String s1 = "Sun 14:00-16:00\nMon 01:00-21:00\nFri 11:00-14:00\nTue 09:00-10:00\nSat 08:00-09:00\nWed 14:00-19:00\nWed 10:00-12:00";
-		String s2 = "Sun 01:00\nMon 00:00\nFri 11:00\nTue 09:00\nSat 08:00\nWed 14:00";
-		String s3 = "Sunday \nMonday \nFriday \nTueday \nSatday \nWedday ";
-		DateFormat df1 = new SimpleDateFormat("EEE HH:mm-HH:mm");
-		DateFormat df2 = new SimpleDateFormat("EEE HH:mm");
-		DateFormat df3 = new SimpleDateFormat("EEE");
+		String s1 = "Sun 14:00-16:00\nMon 01:00-21:00\nFri 11:00-14:00\nTue 09:01-10:00\nSat 08:00-09:00\nWed 14:00-19:00\nWed 10:01-12:00";
+		String s2 = "Mon 01:00-23:00\nTue 01:00-23:00\nWed 01:00-23:00\nThu 01:00-23:00\nFri 01:00-23:00\nSat 01:00-23:00\nSun 01:00-21:00";
 
-		String[] task = s1.split("\n");
+		String[] task = s2.split("\n");
 		List<String> dates = Arrays.asList(task);
 		System.out.println("-=before Sorted=-");
 		for (String d1 : dates) {
@@ -57,10 +53,10 @@ public class App3 {
 		System.out.println(dates);
 
 		List<Date> ldate = new ArrayList<Date>();
-		DateFormat df = new SimpleDateFormat("EEE HH:mm");
+		DateFormat df = new SimpleDateFormat("EEE HH:mm:dd");
 		for (String as : dates) {
-			String s1from = as.substring(0, 3).concat(" ").concat(as.substring(4, 9));
-			String s1to = as.substring(0, 3).concat(" ").concat(as.substring(10));
+			String s1from = as.substring(0, 3).concat(" ").concat(as.substring(4, 9).concat(":01"));
+			String s1to = as.substring(0, 3).concat(" ").concat(as.substring(10).concat(":01"));
 			System.out.println(s1from + " " + s1to);
 			ldate.add(df.parse(s1from));
 			ldate.add(df.parse(s1to));
@@ -71,15 +67,17 @@ public class App3 {
 
 	public static long calcDiffMin(List<Date> dates) throws ParseException {
 		long dif = 0;
+		long difM = 0;
+		long difH = 0;
+		long difA = 0;
+		long diffDays = 0;
 		long result = 0;
+		System.out.println("--calcDif--");
 		DateFormat df = new SimpleDateFormat("EEE");
 		DateFormat df1 = new SimpleDateFormat("EEE HH:mm");
-		int count = 1;
 		Date from;
 		Date to;
 		for (int i = 1; i < dates.size(); i++) {
-			System.out.println("count : " + count);
-			System.out.println("i : " + i);
 			if (i == dates.size()-1) {
 				from = dates.get(i);
 				to = dates.get(0);
@@ -88,20 +86,28 @@ public class App3 {
 				to = dates.get(i + 1);
 			}
 			if (df.format(from).equals("Sun")) {
-				System.out.println("Sun ");
 				to = df1.parse("Mon 00:00");
-				System.out.println(from + " " + to);
+				System.out.println(from + " " +to);
 				dif = from.getTime() - to.getTime();
 			} else {
-				System.out.println(from + " " + to);
+				System.out.println(from + " " +to);
 				dif = from.getTime() - to.getTime();
 			}
-			dif = dif / (60 * 60 * 1000) % 24;
-			dif = Math.abs(dif);
-			System.out.println("dif : " + dif);
-			result = result > dif ? result : dif;
+			difH = dif / (60 * 60 * 1000) % 24;
+			difH = Math.abs(difH);
+			difM = dif / (60 * 1000) % 60;
+			difM = Math.abs(difM);
+			difA = (difH*60)+difM;
+			difA = Math.abs(difA);
+			diffDays = dif / (24 * 60 * 60 * 1000);
+			System.out.println("diff diffDays : " + diffDays);
+			System.out.println("diff Hour : " + difH);
+			System.out.println("diff Min : " + difM);
+			System.out.println("diff HourMin : " + difA);
+
+			//difA = (diffDays>0) ? (difA-(diffDays)) : difA;
+			result = result > difA ? result : difA;
 			i++;
-			count++;
 		}
 		System.out.println("result : " + result);
 		return result;
