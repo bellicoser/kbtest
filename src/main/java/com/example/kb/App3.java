@@ -15,91 +15,96 @@ import java.util.stream.Stream;
  */
 public class App3 {
 	public static void main(String[] args) throws ParseException {
-		String s = "Sun 01:00-09:00\nMon 00:00-21:00\nFri 11:00-14:00\nTue 09:00-10:00\nSat 08:00-09:00\nWed 14:00-09:00";
+		String s1 = "Sun 14:00-16:00\nMon 01:00-21:00\nFri 11:00-14:00\nTue 09:00-10:00\nSat 08:00-09:00\nWed 14:00-19:00\nWed 10:00-12:00";
 		String s2 = "Sun 01:00\nMon 00:00\nFri 11:00\nTue 09:00\nSat 08:00\nWed 14:00";
 		String s3 = "Sunday \nMonday \nFriday \nTueday \nSatday \nWedday ";
-		DateFormat df = new SimpleDateFormat("EEE HH:mm-HH:mm");
+		DateFormat df1 = new SimpleDateFormat("EEE HH:mm-HH:mm");
 		DateFormat df2 = new SimpleDateFormat("EEE HH:mm");
 		DateFormat df3 = new SimpleDateFormat("EEE");
-		List<Date> myList = new ArrayList<Date>();
-		String[] task = s3.split("\n");
-		
+
+		String[] task = s1.split("\n");
+		List<String> dates = Arrays.asList(task);
 		System.out.println("-=before Sorted=-");
-		for (String d1 : task) {
-			myList.add(df3.parse(d1));
+		for (String d1 : dates) {
 			System.out.println(d1);
 		}
-		Collections.sort(myList);
-		
-//		Collections.sort(myList,new Comparator<Date>(){
-//			@Override
-//			public int compare(Date d1,Date d2) {
-//				int compare1 = d1.compareTo(d2);
-//				//boolean compare2 = d1.getDay() > d2.getDay();
-//				//int result = (compare2) ? 1 : 0;
-//				System.out.println("> "+df.format(d1)+" day = "+d1.getDay()+" : "+df.format(d2)+" day = "+d2.getDay()+" ans: "+compare1);
-//				return compare1;
-//			}
-//		});
-	
-		new Comparator<Date>(){
+
+		Collections.sort(dates, new Comparator<String>() {
 			@Override
-			public int compare(Date d1,Date d2) {
-				return 0;
+			public int compare(String s1, String s2) {
+				int result = 0;
+				try {
+					DateFormat format = new SimpleDateFormat("EEE");
+					Date d1 = format.parse(s1);
+					Date d2 = format.parse(s2);
+					if (d1.equals(d2)) {
+						int c = s1.substring(s1.indexOf(" ") + 1).compareTo(s2.substring(s2.indexOf(" ") + 1));
+						result = c;
+					} else {
+						Calendar cal1 = Calendar.getInstance();
+						Calendar cal2 = Calendar.getInstance();
+						cal1.setTime(d1);
+						cal2.setTime(d2);
+						result = cal1.get(Calendar.DAY_OF_WEEK) - cal2.get(Calendar.DAY_OF_WEEK);
+					}
+				} catch (ParseException e) {
+					e.printStackTrace();
+				}
+				return result;
 			}
-		};
+		});
 		System.out.println("-=after Sorted=-");
-		for (Date d1 : myList) {
-			System.out.println(df.format(d1));
-		}
-	}
+		System.out.println(dates);
 
-	public static String[] sorting(String[] task) {
-		
-		return task;
-	}
-
-	// sorting convenience utility
-	public static boolean compareArr(String arr1, String arr2) {
-		arr1 = arr1.substring(0, arr1.indexOf("-"));
-		arr2 = arr2.substring(0, arr2.indexOf("-"));
+		List<Date> ldate = new ArrayList<Date>();
 		DateFormat df = new SimpleDateFormat("EEE HH:mm");
-		Date date1 = null, date2 = null;
-		try {
-			date1 = df.parse(arr1);
-			date2 = df.parse(arr2);
-		} catch (ParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		for (String as : dates) {
+			String s1from = as.substring(0, 3).concat(" ").concat(as.substring(4, 9));
+			String s1to = as.substring(0, 3).concat(" ").concat(as.substring(10));
+			System.out.println(s1from + " " + s1to);
+			ldate.add(df.parse(s1from));
+			ldate.add(df.parse(s1to));
 		}
-		// int result = (date1.before(date2)) ? 0 : 1;
-		// System.out.println("----");
-		System.out.println(arr1 + " -> " + arr2);
-		// System.out.println(date1.before(date2));
-		boolean res = date2.after(date1);
-		System.out.println(res);
-		return res;
+		System.out.println("size = " + ldate.size());
+		calcDiffMin(ldate);
 	}
 
-	public static long calcDiff(String a, String b) {
-		Pattern p1 = Pattern.compile("[\\d:]+", Pattern.CASE_INSENSITIVE);
-		Pattern p2 = Pattern.compile("-[\\d:]+", Pattern.CASE_INSENSITIVE);
-		Matcher m1 = p1.matcher("Sun 08:00-09:00");
-		Matcher m2 = p2.matcher("Sun 08:00-09:00");
-		m1.find();m2.find();
-		System.out.println("found sentense : " + m1.group());
-		System.out.println("found sentense : " + m2.group());
-		DateFormat df = new SimpleDateFormat("HH:mm");
+	public static long calcDiffMin(List<Date> dates) throws ParseException {
 		long dif = 0;
-		try {
-			Date d1 = df.parse(a);
-			Date d2 = df.parse(b);
-			dif = (d1.getTime() - d2.getTime()) / (60 * 1000) % 60;
-		} catch (ParseException e) {
-			e.printStackTrace();
+		long result = 0;
+		DateFormat df = new SimpleDateFormat("EEE");
+		DateFormat df1 = new SimpleDateFormat("EEE HH:mm");
+		int count = 1;
+		Date from;
+		Date to;
+		for (int i = 1; i < dates.size(); i++) {
+			System.out.println("count : " + count);
+			System.out.println("i : " + i);
+			if (i == dates.size()-1) {
+				from = dates.get(i);
+				to = dates.get(0);
+			} else {
+				from = dates.get(i);
+				to = dates.get(i + 1);
+			}
+			if (df.format(from).equals("Sun")) {
+				System.out.println("Sun ");
+				to = df1.parse("Mon 00:00");
+				System.out.println(from + " " + to);
+				dif = from.getTime() - to.getTime();
+			} else {
+				System.out.println(from + " " + to);
+				dif = from.getTime() - to.getTime();
+			}
+			dif = dif / (60 * 60 * 1000) % 24;
+			dif = Math.abs(dif);
+			System.out.println("dif : " + dif);
+			result = result > dif ? result : dif;
+			i++;
+			count++;
 		}
-
-		return dif;
+		System.out.println("result : " + result);
+		return result;
 	}
 
 }
