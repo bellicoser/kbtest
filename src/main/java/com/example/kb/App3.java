@@ -9,6 +9,8 @@ import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 /**
  * Hello world!
@@ -16,7 +18,7 @@ import java.util.stream.Stream;
  */
 public class App3 {
 	public static void main(String[] args) throws ParseException {
-		String s1 = "Sun 14:00-16:00\nMon 01:00-21:00\nFri 21:00-14:00\nTue 21:00-22:00\nSat 08:00-09:00\nWed 14:00-19:00\nWed 10:01-12:00";
+		String s1 = "Sun 14:00-16:00\nMon 01:00-21:00\nFri 21:01-14:00\nTue 21:00-22:00\nSat 08:00-09:00\nWed 14:00-19:00\nWed 01:00-02:00";
 		String s2 = "Mon 01:00-23:00\nTue 01:00-23:00\nWed 01:00-23:00\nThu 01:00-23:00\nFri 01:00-23:00\nSat 01:00-23:00\nSun 01:00-21:00";
 
 		String[] task = s1.split("\n");
@@ -60,6 +62,8 @@ public class App3 {
 		int result = 0;
 		Calendar cal1 = Calendar.getInstance();
 		Calendar cal2 = Calendar.getInstance();
+		System.out.println(">>>>>>>>>>>>>>>>");
+
 		DateFormat format = new SimpleDateFormat("EEE");
 		DateFormat df = new SimpleDateFormat("EEE HH:mm");
 		String from = "";
@@ -67,11 +71,12 @@ public class App3 {
 		for (int i = 0; i < dates.size(); i++) {
 			//System.out.println("i " + i);
 			Date d1 = format.parse(dates.get(i));
+			Date d2 = null;
 			String day1 = format.format(d1);
 			String day2 = "";
 			from = dates.get(i).substring(dates.get(i).indexOf("-") + 1);
 			if (i < dates.size()-1) {
-				Date d2 = format.parse(dates.get(i+1));
+				d2 = format.parse(dates.get(i+1));
 				day2 = format.format(d2);
 				to = dates.get(i + 1).substring(dates.get(i + 1).indexOf(" ") + 1, dates.get(i + 1).indexOf("-"));
 				if (day1.equals("Sun")) {
@@ -79,7 +84,7 @@ public class App3 {
 					to = "00:00";
 				}
 			} else {
-				Date d2 = format.parse(dates.get(0));
+				d2 = format.parse(dates.get(0));
 				day2 = format.format(d2);
 				to = dates.get(0).substring(dates.get(0).indexOf(" ") + 1, dates.get(0).indexOf("-"));
 			}
@@ -88,18 +93,33 @@ public class App3 {
 			System.out.println("> from " + from +" to "+to);
 			cal1.setTime(df.parse(from));
 			cal2.setTime(df.parse(to));
-			result = cal1.get(Calendar.HOUR_OF_DAY) - cal2.get(Calendar.HOUR_OF_DAY);
-			//int DAY_OF_WEEK = cal2.getTime().getDay()-cal1.getTime().getDay();
-			//int HOUR_OF_DAY = cal2.getTime().getHours()-cal1.getTime().getHours();
-			//System.out.println("DAY_OF_WEEK "+DAY_OF_WEEK);
-			//System.out.println("HOUR_OF_DAY "+HOUR_OF_DAY);
+			//result = cal1.get(Calendar.HOUR_OF_DAY) - cal2.get(Calendar.HOUR_OF_DAY);
+//			System.out.println("DAY_OF_WEEK "+cal1.get(Calendar.DAY_OF_WEEK)+" HOUR_OF_DAY "+cal1.get(Calendar.HOUR_OF_DAY));
+//			System.out.println("DAY_OF_WEEK "+cal2.get(Calendar.DAY_OF_WEEK)+" HOUR_OF_DAY "+cal2.get(Calendar.HOUR_OF_DAY));
+//			int DAY_OF_WEEK = cal2.get(Calendar.DAY_OF_WEEK)-cal1.get(Calendar.DAY_OF_WEEK);
+//			int HOUR_OF_DAY = cal2.get(Calendar.HOUR_OF_DAY)-cal1.get(Calendar.HOUR_OF_DAY);
+//			System.out.println("Diff  "+DAY_OF_WEEK+" Diff "+HOUR_OF_DAY);
+		
 			long days = ChronoUnit.DAYS.between(cal1.toInstant(), cal2.toInstant());
 			long hours = ChronoUnit.HOURS.between(cal1.toInstant(), cal2.toInstant());
 			long mins = ChronoUnit.MINUTES.between(cal1.toInstant(), cal2.toInstant());
-			System.out.println("getTime "+cal1.getTime());
 			System.out.println("days "+days);
 			System.out.println("hours "+hours);
 			System.out.println("mins "+mins);
+			if (mins < 0) {
+				System.out.println("java bugs day ");
+				System.out.println("DAY_OF_WEEK "+cal1.get(Calendar.DAY_OF_WEEK)+" HOUR_OF_DAY "+cal1.get(Calendar.HOUR_OF_DAY)+" MINUTE "+cal1.get(Calendar.MINUTE));
+				System.out.println("DAY_OF_WEEK "+cal2.get(Calendar.DAY_OF_WEEK)+" HOUR_OF_DAY "+cal2.get(Calendar.HOUR_OF_DAY)+" MINUTE "+cal2.get(Calendar.MINUTE));
+				int DAY_OF_WEEK = cal2.get(Calendar.DAY_OF_WEEK)-cal1.get(Calendar.DAY_OF_WEEK);
+				int HOUR_OF_DAY = cal2.get(Calendar.HOUR_OF_DAY)-cal1.get(Calendar.HOUR_OF_DAY);
+				int MINUTE = cal2.get(Calendar.MINUTE)-cal1.get(Calendar.MINUTE);
+				System.out.println("DiffDAY_OF_WEEK  "+DAY_OF_WEEK+" DiffHOUR_OF_DAY "+HOUR_OF_DAY+" DiffMINUTE "+MINUTE);
+				mins = (DAY_OF_WEEK-1)*24*60 + HOUR_OF_DAY*60 + MINUTE;
+				System.out.println("new mins "+mins);
+			}
+//			long seconds = (cal2.getTimeInMillis()-cal1.getTimeInMillis()) /1000;
+//			int hours = (int) (seconds / 3600);
+//			System.out.println("hours "+hours);
 		}
 		return result;
 	}
