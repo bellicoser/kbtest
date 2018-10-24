@@ -3,6 +3,7 @@ package com.example.kb;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
@@ -15,10 +16,10 @@ import java.util.stream.Stream;
  */
 public class App3 {
 	public static void main(String[] args) throws ParseException {
-		String s1 = "Sun 14:00-16:00\nMon 01:00-21:00\nFri 11:00-14:00\nTue 09:01-10:00\nSat 08:00-09:00\nWed 14:00-19:00\nWed 10:01-12:00";
+		String s1 = "Sun 14:00-16:00\nMon 01:00-21:00\nFri 21:00-14:00\nTue 21:00-22:00\nSat 08:00-09:00\nWed 14:00-19:00\nWed 10:01-12:00";
 		String s2 = "Mon 01:00-23:00\nTue 01:00-23:00\nWed 01:00-23:00\nThu 01:00-23:00\nFri 01:00-23:00\nSat 01:00-23:00\nSun 01:00-21:00";
 
-		String[] task = s2.split("\n");
+		String[] task = s1.split("\n");
 		List<String> dates = Arrays.asList(task);
 		System.out.println("-=before Sorted=-");
 		for (String d1 : dates) {
@@ -51,65 +52,55 @@ public class App3 {
 		});
 		System.out.println("-=after Sorted=-");
 		System.out.println(dates);
-
-		List<Date> ldate = new ArrayList<Date>();
-		DateFormat df = new SimpleDateFormat("EEE HH:mm:dd");
-		for (String as : dates) {
-			String s1from = as.substring(0, 3).concat(" ").concat(as.substring(4, 9).concat(":01"));
-			String s1to = as.substring(0, 3).concat(" ").concat(as.substring(10).concat(":01"));
-			System.out.println(s1from + " " + s1to);
-			ldate.add(df.parse(s1from));
-			ldate.add(df.parse(s1to));
-		}
-		System.out.println("size = " + ldate.size());
-		calcDiffMin(ldate);
+		System.out.println("size = " + dates.size());
+		calcDiffMin(dates);
 	}
 
-	public static long calcDiffMin(List<Date> dates) throws ParseException {
-		long dif = 0;
-		long difM = 0;
-		long difH = 0;
-		long difA = 0;
-		long diffDays = 0;
-		long result = 0;
-		System.out.println("--calcDif--");
-		DateFormat df = new SimpleDateFormat("EEE");
-		DateFormat df1 = new SimpleDateFormat("EEE HH:mm");
-		Date from;
-		Date to;
-		for (int i = 1; i < dates.size(); i++) {
-			if (i == dates.size()-1) {
-				from = dates.get(i);
-				to = dates.get(0);
+	public static long calcDiffMin(List<String> dates) throws ParseException {
+		int result = 0;
+		Calendar cal1 = Calendar.getInstance();
+		Calendar cal2 = Calendar.getInstance();
+		DateFormat format = new SimpleDateFormat("EEE");
+		DateFormat df = new SimpleDateFormat("EEE HH:mm");
+		String from = "";
+		String to = "";
+		for (int i = 0; i < dates.size(); i++) {
+			//System.out.println("i " + i);
+			Date d1 = format.parse(dates.get(i));
+			String day1 = format.format(d1);
+			String day2 = "";
+			from = dates.get(i).substring(dates.get(i).indexOf("-") + 1);
+			if (i < dates.size()-1) {
+				Date d2 = format.parse(dates.get(i+1));
+				day2 = format.format(d2);
+				to = dates.get(i + 1).substring(dates.get(i + 1).indexOf(" ") + 1, dates.get(i + 1).indexOf("-"));
+				if (day1.equals("Sun")) {
+					System.out.println("> Sun Case limit is 00:00");
+					to = "00:00";
+				}
 			} else {
-				from = dates.get(i);
-				to = dates.get(i + 1);
+				Date d2 = format.parse(dates.get(0));
+				day2 = format.format(d2);
+				to = dates.get(0).substring(dates.get(0).indexOf(" ") + 1, dates.get(0).indexOf("-"));
 			}
-			if (df.format(from).equals("Sun")) {
-				to = df1.parse("Mon 00:00");
-				System.out.println(from + " " +to);
-				dif = from.getTime() - to.getTime();
-			} else {
-				System.out.println(from + " " +to);
-				dif = from.getTime() - to.getTime();
-			}
-			difH = dif / (60 * 60 * 1000) % 24;
-			difH = Math.abs(difH);
-			difM = dif / (60 * 1000) % 60;
-			difM = Math.abs(difM);
-			difA = (difH*60)+difM;
-			difA = Math.abs(difA);
-			diffDays = dif / (24 * 60 * 60 * 1000);
-			System.out.println("diff diffDays : " + diffDays);
-			System.out.println("diff Hour : " + difH);
-			System.out.println("diff Min : " + difM);
-			System.out.println("diff HourMin : " + difA);
-
-			//difA = (diffDays>0) ? (difA-(diffDays)) : difA;
-			result = result > difA ? result : difA;
-			i++;
+			from = day1.concat(" ").concat(from);
+			to = day2.concat(" ").concat(to);
+			System.out.println("> from " + from +" to "+to);
+			cal1.setTime(df.parse(from));
+			cal2.setTime(df.parse(to));
+			result = cal1.get(Calendar.HOUR_OF_DAY) - cal2.get(Calendar.HOUR_OF_DAY);
+			//int DAY_OF_WEEK = cal2.getTime().getDay()-cal1.getTime().getDay();
+			//int HOUR_OF_DAY = cal2.getTime().getHours()-cal1.getTime().getHours();
+			//System.out.println("DAY_OF_WEEK "+DAY_OF_WEEK);
+			//System.out.println("HOUR_OF_DAY "+HOUR_OF_DAY);
+			long days = ChronoUnit.DAYS.between(cal1.toInstant(), cal2.toInstant());
+			long hours = ChronoUnit.HOURS.between(cal1.toInstant(), cal2.toInstant());
+			long mins = ChronoUnit.MINUTES.between(cal1.toInstant(), cal2.toInstant());
+			System.out.println("getTime "+cal1.getTime());
+			System.out.println("days "+days);
+			System.out.println("hours "+hours);
+			System.out.println("mins "+mins);
 		}
-		System.out.println("result : " + result);
 		return result;
 	}
 
