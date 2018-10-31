@@ -39,7 +39,7 @@ public class App {
 			if (B[i] != A[i]) count++;
 		}
 		System.out.print("\ncount : "+count+" ");
-		if (count == 2) return true;
+		if (count == 2 || count == 0) return true;
 		return false;
 	}
 
